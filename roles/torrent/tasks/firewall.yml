@@ -1,0 +1,28 @@
+- name: install dependencies
+  apt:
+    name:
+      - ufw
+      - host
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: allow ssh
+  ufw:
+    rule: limit
+    port: ssh
+    proto: tcp
+
+- name: allow transmission
+  ufw: 
+    rule: allow
+    port: "{{ item.port }}"
+    proto: tcp
+  with_items:
+    - port: '9091'
+    - port: '51413'
+
+- name: enable ufw
+  ufw:
+    logging: "on"
+    state: enabled

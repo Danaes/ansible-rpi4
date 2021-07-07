@@ -1,0 +1,28 @@
+---
+- include: firewall.yml
+
+- name: Install transmission packages
+  apt:
+    update_cache: yes
+    autoremove: yes
+    state: latest
+    name:
+      - transmission-daemon
+
+- name: Stop transmission-daemon
+  systemd:
+    name: transmission-daemon
+    state: stopped
+
+- name: Setup settings.json
+  template:
+    src: settings.json.j2
+    dest: /etc/transmission-daemon/settings.json
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Start transmission-daemon
+  systemd:
+    name: transmission-daemon
+    state: restarted

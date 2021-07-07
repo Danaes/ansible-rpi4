@@ -1,0 +1,66 @@
+---
+- name: Run apt-get update
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+
+- name: Install required packages
+  apt:
+    name:
+      - htop
+      - vim
+      - git-core
+      - ntfs-3g
+    state: present
+
+- name: Reset cron
+  shell: "crontab -r || echo already clean"
+  tags: [ cron ]
+
+- name: Configure static IP in  /etc/dhcpcd.conf
+  lineinfile:
+    dest:  /etc/dhcpcd.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    - { regexp: "^interface eth[0-9]$", line: "interface eth0" }
+    - { regexp: "^static ip_address", line: "static ip_address=192.168.1.10/24" }
+    - { regexp: "^static routers", line: "static routers=192.168.1.1" }
+    - { regexp: "^static domain_name_servers", line: "static domain_name_servers=192.168.1.1" }
+  notify: reboot
+
+- name: Configure cron to clean and update raspberryPi
+  cron:
+    name: every month at 1am launch raspi-clean-and-update.sh
+    minute: "0"
+    hour: "1"
+    day: "1"
+    user: root
+    job: "/bin/sh /usr/local/bin/raspi-clean-and-update.sh"
+    cron_file: raspi-clean-and-update
+  tags: [ cron ]
+
+- name: Maintenance script to delete logs, update dist upgrade
+  copy:
+    dest: /usr/local/bin/raspi-clean-and-update.sh
+    content: |
+      set -x
+      find /var/log -name '*.gz' | xargs rm -f {}
+      find /var/log -type f | xargs cat /dev/null > {}
+      apt update -y
+      apt autoremove
+      apt upgrade -y
+      apt dist-upgrade -y
+  tags: [ cron ]
+
+- name: Change file permissions
+  file:
+    path: /usr/local/bin/raspi-clean-and-update.sh
+    owner: root
+    group: root
+    mode: '0775'
