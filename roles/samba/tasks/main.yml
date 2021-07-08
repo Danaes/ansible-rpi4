@@ -38,3 +38,9 @@
         create mask=0775
         directory mask=0775
         public=no
+
+- name: allow Samba
+  ufw:
+    rule: allow
+    port: Samba
+    proto: tcp
