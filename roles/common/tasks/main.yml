@@ -64,3 +64,15 @@
     owner: root
     group: root
     mode: '0775'
+
+- name: Create directory for NAS
+  file: { path: /media/NAS, state: directory }
+  tags: [ disk ]
+
+- name: '/etc/fstab'
+  lineinfile:
+    path: /etc/fstab
+    line: '/dev/sda1 /media/NAS ntfs nls-utf8,umask-0666,uid=www-data,gid=www-data,rw 0 0'
+    regexp: ^.*\/media/NAS
+  register: fstab
+  tags: [ disk, fstab ]

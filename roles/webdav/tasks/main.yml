@@ -1,0 +1,57 @@
+---
+#- name: Install Apache web server
+#  register: apache2installed
+#  apt:
+#    update_cache: yes
+#    autoremove: yes
+#    state: latest
+#    name:
+#      - apache2
+#      - apache2-utils
+#  notify:
+#    - Start Apache2
+#
+#- name: Enable dav and dav_fs modules
+#  when: apache2installed
+#  command: a2enmod dav dav_fs
+#  notify:
+#    - Reload Apache2
+
+- name: Add Apache2 config
+  template: 
+    src: 000-default.j2 
+    dest: /etc/apache2/sites-available/000-default.conf 
+    owner: www-data 
+    group: www-data
+
+#- name: Set permissions
+#  file: 
+#    dest: /var/www
+#    owner: www-data 
+#    group: www-data
+#  notify:
+#    - Reload Apache2
+#
+#- name: allow apache2 in firewall
+#  ufw: 
+#    rule: allow
+#    port: "{{ item.port }}"
+#    proto: tcp
+#  with_items:
+#    - port: '80'
+#    - port: '443'
+#
+#- name: add directives
+#  blockinfile:
+#    path: /etc/apache2/apache2.conf
+#    block: |
+#      ServerSignature Off
+#      ServerTokens Prod
+#      ServerName 192.168.1.10
+#
+- name: Remove server information
+  file:
+    path: /var/www/html/index.html
+    state: absent
+  notify:
+    - Reload Apache2

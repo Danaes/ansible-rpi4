@@ -1,3 +1,0 @@
----
-- name: restart samba
-  command: service smbd restart
