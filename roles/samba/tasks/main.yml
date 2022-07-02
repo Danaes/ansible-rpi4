@@ -1,0 +1,27 @@
+---
+- name: Install samba packages
+  apt:
+    update_cache: yes
+    autoremove: yes
+    state: latest
+    name:
+      - samba
+      - samba-common-bin
+      - smbclient
+
+- name: Samba configuration
+  blockinfile:
+    path: /etc/samba/smb.conf
+    block: |
+      [torrent]
+        path = /media/NAS/torrent
+        writeable=No
+        create mask=0775
+        directory mask=0775
+        public=yes
+
+- name: allow Samba
+  ufw:
+    rule: allow
+    port: Samba
+    proto: tcp
