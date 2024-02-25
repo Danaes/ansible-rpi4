@@ -2,8 +2,7 @@
   remote_user: pi
   become: yes
   roles:
-    # - common
+    - common
     # - noip
-    - samba
-    # - torrent
-    # - webdav
+    # - samba
+    - torrent

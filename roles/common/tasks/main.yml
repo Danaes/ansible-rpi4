@@ -15,23 +15,24 @@
       - vim
       - git-core
       - ntfs-3g
+      - apt-transport-https
     state: present
 
 - name: Reset cron
   shell: "crontab -r || echo already clean"
   tags: [ cron ]
 
-- name: Configure static IP in  /etc/dhcpcd.conf
-  lineinfile:
-    dest:  /etc/dhcpcd.conf
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    state: present
-  with_items:
-    - { regexp: "^interface eth[0-9]$", line: "interface eth0" }
-    - { regexp: "^static ip_address", line: "static ip_address=192.168.1.10/24" }
-    - { regexp: "^static routers", line: "static routers=192.168.1.1" }
-    - { regexp: "^static domain_name_servers", line: "static domain_name_servers=192.168.1.1" }
+- name: Configure static IP in /etc/network/interfaces
+  blockinfile:
+    path: /etc/network/interfaces
+    block: |
+      auto eth0
+      iface eth0 inet static
+        address 192.168.1.10/24
+        network 192.168.1.0
+        broadcast 192.168.1.255
+        gateway 192.168.1.1
+        dns-nameservers 192.168.1.1
   notify: reboot
 
 - name: Configure cron to clean and update raspberryPi
